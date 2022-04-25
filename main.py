@@ -6,7 +6,7 @@
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
-    print("aysel22")
+    print("aysel2as2")
 
 
 # Press the green button in the gutter to run the script.
