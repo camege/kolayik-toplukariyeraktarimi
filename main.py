@@ -12,6 +12,7 @@ HEADERS = {"Authorization":"Bearer " + API_TOKEN}
 # ID'leri dogru bir payload olusturarak save istegiyle atip kariyer olusturacak
 # Exception Handling & Belki bir raporlama (ne kadar basarili oldu, ne kadar fail oldu)
 
+
 def id_listing_for_career():
     company_structure = []
     response = requests.request("GET", CAREER_ID_URL, headers=HEADERS)
