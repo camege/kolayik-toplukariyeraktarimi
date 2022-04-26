@@ -2,6 +2,7 @@ import requests
 import json
 
 BASE_URL = "https://kolayik.com/api/v1/"
+
 CAREER_ID_URL = BASE_URL + "company-structure/list-for-filter"
 API_TOKEN = ""
 # GITHUBA PUSHLARKEN TOKENI KALDIR
