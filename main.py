@@ -16,6 +16,7 @@ HEADERS = {"Authorization":"Bearer " + API_TOKEN}
 # Exception Handling & Belki bir raporlama (ne kadar basarili oldu, ne kadar fail oldu)
 
 def read_from_excel():
+
     baska_array = []
     df = pd.read_excel('testing.xlsx')
     df.to_csv('testing.csv',header=True)
