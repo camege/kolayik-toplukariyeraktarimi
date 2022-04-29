@@ -19,7 +19,7 @@ HEADERS = {"Authorization":"Bearer " + API_TOKEN}
 
 def read_from_excel():
     baska_array = []
-    df = pd.read_excel('testing.xlsx')
+    df = pd.read_excel('test_toplukariyeraktarimi.xlsx')
     df.to_csv('testing.csv',header=True)
     with open('testing.csv','r') as csv_file:
       csv_reader = csv.reader(csv_file)
@@ -31,6 +31,21 @@ def read_from_excel():
           # print(temp_dict)
           baska_array.append(temp_dict)
     return baska_array
+
+def find_and_match():
+    temp = read_from_excel()
+    listtemp = id_listing_for_career()
+    for key,value in (temp[0].items()):
+        for t in listtemp:
+            if unidecode(t['name'].lower()) == unidecode(key.lower()):
+                print(t['name'], key)
+                for y in t['items']:
+                    if unidecode(value.lower()) == unidecode(t['items'][y]['name'].lower()):
+                        print(value,t['items'][y]['name'])
+
+#   esitlik yoksa ne yapacagiz? hata verip, yapmayabiliriz, programi durdurabiliriz
+#   exception handling (try/catch)
+#   satir satir loglayabiliriz yaptik yapamadik diye
 
 def id_listing_for_career():
     company_structure = []
@@ -44,12 +59,16 @@ def id_listing_for_career():
             "sequence": json.loads(response.text)['data'][i]['sequence'],
             "status": json.loads(response.text)['data'][i]['status'],
         }
+        # {
+        #     'companyUnitItemId[' + hiyerarsidekiyeri + ']': unvan,
+        # }
         company_structure.append(temp_object)
     return company_structure
 
 if __name__ == "__main__":
     # temp = (read_from_excel())
-    print(unidecode('çamlıbel'))
+    find_and_match()
+    # print(unidecode('çamlıbel'))
     # temp = (id_listing_for_career())
     # for i in temp:
     #     print(i['name'] + ":")
