@@ -2,6 +2,7 @@ import requests
 import json
 import pandas as pd
 import csv
+from unidecode import unidecode
 
 BASE_URL = "https://kolayik.com/api/v1/"
 CAREER_ID_URL = BASE_URL + "company-structure/list-for-filter"
@@ -16,7 +17,6 @@ HEADERS = {"Authorization":"Bearer " + API_TOKEN}
 # Exception Handling & Belki bir raporlama (ne kadar basarili oldu, ne kadar fail oldu)
 
 def read_from_excel():
-
     baska_array = []
     df = pd.read_excel('testing.xlsx')
     df.to_csv('testing.csv',header=True)
@@ -47,7 +47,8 @@ def id_listing_for_career():
     return company_structure
 
 if __name__ == "__main__":
-    temp = (read_from_excel())
+    # temp = (read_from_excel())
+    print(unidecode('çamlıbel'))
     # temp = (id_listing_for_career())
     # for i in temp:
     #     print(i['name'] + ":")
