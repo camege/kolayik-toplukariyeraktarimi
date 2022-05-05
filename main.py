@@ -7,7 +7,7 @@ from unidecode import unidecode
 BASE_URL = "https://kolayik.com/api/v1/"
 # deneme
 CAREER_ID_URL = BASE_URL + "company-structure/list-for-filter"
-API_TOKEN = "3aadb77aea29a3219894c268694e6f724ed942073ed3fa577a5969815c7cef64"
+API_TOKEN = ""
 # GITHUBA PUSHLARKEN TOKENI KALDIR
 HEADERS = {"Authorization":"Bearer " + API_TOKEN}
 
