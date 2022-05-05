@@ -7,7 +7,7 @@ from unidecode import unidecode
 BASE_URL = "https://kolayik.com/api/v1/"
 # deneme
 CAREER_ID_URL = BASE_URL + "company-structure/list-for-filter"
-API_TOKEN = ""
+API_TOKEN = "3aadb77aea29a3219894c268694e6f724ed942073ed3fa577a5969815c7cef64"
 # GITHUBA PUSHLARKEN TOKENI KALDIR
 HEADERS = {"Authorization":"Bearer " + API_TOKEN}
 
@@ -38,10 +38,12 @@ def find_and_match():
     for key,value in (temp[0].items()):
         for t in listtemp:
             if unidecode(t['name'].lower()) == unidecode(key.lower()):
-                print(t['name'], key)
+                # print(t['id'], key)
                 for y in t['items']:
                     if unidecode(value.lower()) == unidecode(t['items'][y]['name'].lower()):
-                        print(value,t['items'][y]['name'])
+                        # print(value,t['items'][y]['id'])
+                        print({"companyUnitItemId[" + t['id'] + "]": str(t['items'][y]['id'])})
+                    # print(t)
 
 #   esitlik yoksa ne yapacagiz? hata verip, yapmayabiliriz, programi durdurabiliriz
 #   exception handling (try/catch)
