@@ -41,10 +41,12 @@ def find_and_match():
     for key,value in (temp[0].items()):
         for t in listtemp:
             if unidecode(t['name'].lower()) == unidecode(key.lower()):
-                print(t['name'], key)
+                # print(t['id'], key)
                 for y in t['items']:
                     if unidecode(value.lower()) == unidecode(t['items'][y]['name'].lower()):
-                        print(value,t['items'][y]['name'])
+                        # print(value,t['items'][y]['id'])
+                        print({"companyUnitItemId[" + t['id'] + "]": str(t['items'][y]['id'])})
+                    # print(t)
 
 #   esitlik yoksa ne yapacagiz? hata verip, yapmayabiliriz, programi durdurabiliriz
 #   exception handling (try/catch)
