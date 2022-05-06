@@ -38,15 +38,30 @@ def read_from_excel():
 def find_and_match():
     temp = read_from_excel()
     listtemp = id_listing_for_career()
+    temp_dict = {}
     for key,value in (temp[0].items()):
+        # print(key, value)
+
+        if unidecode(key.lower()) == "baslangic tarihi":
+            temp_dict['startDate'] = value
+            print({"startDate" : value})
+
+        # bitis tarihi, calisma sekli, yonetici tckn, tckn
+
+        # if unidecode(key.lower()) == "calisma sekli":
+        #     if unidecode(value.lower()) == "tam zamanli":
+        #
+        #     elif
+
         for t in listtemp:
             if unidecode(t['name'].lower()) == unidecode(key.lower()):
                 # print(t['id'], key)
                 for y in t['items']:
                     if unidecode(value.lower()) == unidecode(t['items'][y]['name'].lower()):
                         # print(value,t['items'][y]['id'])
+                        temp_dict["companyUnitItemId[" + t['id'] + "]"] = str(t['items'][y]['id'])
                         print({"companyUnitItemId[" + t['id'] + "]": str(t['items'][y]['id'])})
-                    # print(t)
+
 
 #   esitlik yoksa ne yapacagiz? hata verip, yapmayabiliriz, programi durdurabiliriz
 #   exception handling (try/catch)
@@ -55,19 +70,22 @@ def find_and_match():
 def id_listing_for_career():
     company_structure = []
     response = requests.request("GET", CAREER_ID_URL, headers=HEADERS)
-    for i in json.loads(response.text)['data']:
-        # print(json.loads(response.text)['data'][i])
-        temp_object = {
-            "id": json.loads(response.text)['data'][i]['id'],
-            "name": json.loads(response.text)['data'][i]['name'],
-            "items": json.loads(response.text)['data'][i]['items'],
-            "sequence": json.loads(response.text)['data'][i]['sequence'],
-            "status": json.loads(response.text)['data'][i]['status'],
-        }
-        # {
-        #     'companyUnitItemId[' + hiyerarsidekiyeri + ']': unvan,
-        # }
-        company_structure.append(temp_object)
+    if response.status_code == 200:
+        for i in json.loads(response.text)['data']:
+            # print(json.loads(response.text)['data'][i])
+            temp_object = {
+                "id": json.loads(response.text)['data'][i]['id'],
+                "name": json.loads(response.text)['data'][i]['name'],
+                "items": json.loads(response.text)['data'][i]['items'],
+                "sequence": json.loads(response.text)['data'][i]['sequence'],
+                "status": json.loads(response.text)['data'][i]['status'],
+            }
+            # {
+            #     'companyUnitItemId[' + hiyerarsidekiyeri + ']': unvan,
+            # }
+            company_structure.append(temp_object)
+    else:
+        print("error")
     return company_structure
 
 if __name__ == "__main__":
