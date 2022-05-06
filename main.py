@@ -10,7 +10,9 @@ CAREER_ID_URL = BASE_URL + "company-structure/list-for-filter"
 API_TOKEN = ""
 # GITHUBA PUSHLARKEN TOKENI KALDIR
 HEADERS = {"Authorization":"Bearer " + API_TOKEN}
+
 SEARCH_METHOD = BASE_URL + "person/new-search"
+
 
 # Excel olacak, gidecek exceli okuyacak (csv'de olabilir) TAMAM
 # Bilgileri alacak string olarak, esdeger ID'leri bulacak (list-for-filter) TAMAM
