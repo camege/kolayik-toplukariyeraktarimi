@@ -10,15 +10,20 @@ CAREER_ID_URL = BASE_URL + "company-structure/list-for-filter"
 API_TOKEN = ""
 # GITHUBA PUSHLARKEN TOKENI KALDIR
 HEADERS = {"Authorization":"Bearer " + API_TOKEN}
-# 
-# 
-# 
+
+SEARCH_METHOD = BASE_URL + "person/new-search"
 
 
-# Excel olacak, gidecek exceli okuyacak (csv'de olabilir)
-# Bilgileri alacak string olarak, esdeger ID'leri bulacak (list-for-filter)
-# ID'leri dogru bir payload olusturarak save istegiyle atip kariyer olusturacak
+# Excel olacak, gidecek exceli okuyacak (csv'de olabilir) TAMAM
+# Bilgileri alacak string olarak, esdeger ID'leri bulacak (list-for-filter) TAMAM
+# ID'leri dogru bir payload olusturarak save istegiyle atip kariyer olusturacak TAMAM
 # Exception Handling & Belki bir raporlama (ne kadar basarili oldu, ne kadar fail oldu)
+
+def get_ID(value):
+    response = requests.request("POST", SEARCH_METHOD, headers=HEADERS, data=(value))
+    json_data = json.loads(response.text)
+    for item in json_data['items']:
+        return json_data['items'][item]['id']
 
 def read_from_excel():
     baska_array = []
@@ -39,19 +44,29 @@ def find_and_match():
     temp = read_from_excel()
     listtemp = id_listing_for_career()
     temp_dict = {}
+    temp_array = []
     for key,value in (temp[0].items()):
         # print(key, value)
-
         if unidecode(key.lower()) == "baslangic tarihi":
-            temp_dict['startDate'] = value
-            print({"startDate" : value})
+            print(value[:5] + value[6:])
+            temp_dict['startDate'] = value[:5] + value[6:]
+            # print({"startDate" : value})
+        if unidecode(key.lower()) == "bitis tarihi":
+            temp_dict['endDate'] = value[:5] + value[6:]
+        if unidecode(key.lower()) == "calisma sekli":
+            temp_dict['employmentType'] = "fulltime"
+        #     if value == "":
+        #         temp_dict['employmentType'] = "fulltime"
+        #     elif value == "":
+        #         temp_dict['employmentType'] = "parttime"
+        if unidecode(key.lower()) == "default":
+            temp_dict['default'] = value
+        if unidecode(key.lower()) == "yonetici tckn":
+            temp_dict['managerId'] = get_ID({"page": 1, "status": 1, "q": value})
+        if unidecode(key.lower()) == "tckn ":
+            temp_dict['personId'] = get_ID({"page": 1, "status": 1, "q": value})
 
         # bitis tarihi, calisma sekli, yonetici tckn, tckn
-
-        # if unidecode(key.lower()) == "calisma sekli":
-        #     if unidecode(value.lower()) == "tam zamanli":
-        #
-        #     elif
 
         for t in listtemp:
             if unidecode(t['name'].lower()) == unidecode(key.lower()):
@@ -60,7 +75,12 @@ def find_and_match():
                     if unidecode(value.lower()) == unidecode(t['items'][y]['name'].lower()):
                         # print(value,t['items'][y]['id'])
                         temp_dict["companyUnitItemId[" + t['id'] + "]"] = str(t['items'][y]['id'])
-                        print({"companyUnitItemId[" + t['id'] + "]": str(t['items'][y]['id'])})
+                        # print({"companyUnitItemId[" + t['id'] + "]": str(t['items'][y]['id'])})
+                        temp_array.append({"companyUnitItemId":str(t['items'][y]['id'])})
+    # print(temp_array)
+    temp_dict['items'] = temp_array
+    # print(temp_dict)
+    return(temp_dict)
 
 
 #   esitlik yoksa ne yapacagiz? hata verip, yapmayabiliriz, programi durdurabiliriz
@@ -88,9 +108,19 @@ def id_listing_for_career():
         print("error")
     return company_structure
 
+def make_the_call(payload):
+    print(payload)
+    response = requests.request("POST", BASE_URL + "person-unit/save", headers={"Authorization":"Bearer " + API_TOKEN, "Content-Type":"application/json"}, data=json.dumps(payload))
+    if response.status_code == 200:
+        print("basarili")
+        # istek basarili olduysa aksiyon ayarla
+    else:
+        print(response.text)
+
 if __name__ == "__main__":
     # temp = (read_from_excel())
-    find_and_match()
+    payload = find_and_match()
+    make_the_call(payload)
     # print(unidecode('çamlıbel'))
     # temp = (id_listing_for_career())
     # for i in temp:
