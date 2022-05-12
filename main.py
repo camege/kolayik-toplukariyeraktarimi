@@ -18,6 +18,9 @@ SEARCH_METHOD = BASE_URL + "person/new-search"
 # ID'leri dogru bir payload olusturarak save istegiyle atip kariyer olusturacak TAMAM
 # Exception Handling & Belki bir raporlama (ne kadar basarili oldu, ne kadar fail oldu)
 
+# 12.05 Commentler
+# Mappingler icin test-case hazirlanacak, ozellikle calisma tipleri
+
 def get_ID(value):
     # exception handling eklenmeli
     temp = read_from_excel()
@@ -26,19 +29,9 @@ def get_ID(value):
         json_data = json.loads(response.text)
         for item in json_data['items']:
             return json_data['items'][item]['id']
-
     else:
-        #for n in temp:
-        #    if temp[n]['TCKN'] == value or temp[n]['Yonetici TCKN'] == value:
-        #        orderno = temp[n]['']
-        #        print(str(int(orderno) + 2) + " YÜKLENEMEDİ")
-            #for key2,value2 in (n.items()):
-            #    if key2 == '' and value2 == value:
-            #        print(str(int(value2) + 2)+" YÜKLENEMEDİ")
-
-        print(json.loads(response.text))
+        # print(json.loads(response.text))
         return None
-
 
 def read_from_excel():
     baska_array = []
@@ -51,7 +44,6 @@ def read_from_excel():
           temp_dict = {}
           for i in row1:
               temp_dict[i] = line[row1.index(i)]
-          # print(temp_dict)
           baska_array.append(temp_dict)
     return baska_array
 
@@ -95,7 +87,7 @@ def find_and_match():
                     temp_dict['default'] = value
                     #temp_dict['endDate'] == None
                     del temp_dict['endDate']
-
+            #         temp_dict['endDate'] = ""
             #     burasi bool olacak, varsayilan kariyer hatasi nedir ogrenilecek
 
 
@@ -122,10 +114,6 @@ def find_and_match():
     return (general_array)
 
 
-#   esitlik yoksa ne yapacagiz? hata verip, yapmayabiliriz, programi durdurabiliriz
-#   exception handling (try/catch)
-#   satir satir loglayabiliriz yaptik yapamadik diye
-
 def id_listing_for_career():
     company_structure = []
     response = requests.request("GET", CAREER_ID_URL, headers=HEADERS)
@@ -139,9 +127,6 @@ def id_listing_for_career():
                 "sequence": json.loads(response.text)['data'][i]['sequence'],
                 "status": json.loads(response.text)['data'][i]['status'],
             }
-            # {
-            #     'companyUnitItemId[' + hiyerarsidekiyeri + ']': unvan,
-            # }
             company_structure.append(temp_object)
     else:
         print("error")
@@ -158,17 +143,9 @@ def make_the_call(payload):
             # istek basarili oldugu icin herhangi bir aksiyon yapmamiza gerek yok
 
         else:
-            print(a['order_no'] + " NUMARALI SATIR YUKLENEMEDİ")
-            print(response.text)
+            print(a['order_no'] + " NUMARALI SATIR YUKLENEMEDİ", json.loads(response.text)['message'])
+
 
 if __name__ == "__main__":
-    #find_and_match()
-    # temp = (read_from_excel())
     payload = find_and_match()
     make_the_call(payload)
-    # print(unidecode('çamlıbel'))
-    # temp = (id_listing_for_career())
-    # for i in temp:
-    #     print(i['name'] + ":")
-    #     for t in i['items']:
-    #         print(i['items'][t]['name'])
