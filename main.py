@@ -12,6 +12,7 @@ API_TOKEN = ""
 HEADERS = {"Authorization":"Bearer " + API_TOKEN}
 SEARCH_METHOD = BASE_URL + "person/new-search"
 
+
 # Excel olacak, gidecek exceli okuyacak (csv'de olabilir) TAMAM
 # Bilgileri alacak string olarak, esdeger ID'leri bulacak (list-for-filter) TAMAM
 # ID'leri dogru bir payload olusturarak save istegiyle atip kariyer olusturacak TAMAM
@@ -19,10 +20,25 @@ SEARCH_METHOD = BASE_URL + "person/new-search"
 
 def get_ID(value):
     # exception handling eklenmeli
+    temp = read_from_excel()
     response = requests.request("POST", SEARCH_METHOD, headers=HEADERS, data=(value))
-    json_data = json.loads(response.text)
-    for item in json_data['items']:
-        return json_data['items'][item]['id']
+    if response.status_code == 200:
+        json_data = json.loads(response.text)
+        for item in json_data['items']:
+            return json_data['items'][item]['id']
+
+    else:
+        #for n in temp:
+        #    if temp[n]['TCKN'] == value or temp[n]['Yonetici TCKN'] == value:
+        #        orderno = temp[n]['']
+        #        print(str(int(orderno) + 2) + " YÜKLENEMEDİ")
+            #for key2,value2 in (n.items()):
+            #    if key2 == '' and value2 == value:
+            #        print(str(int(value2) + 2)+" YÜKLENEMEDİ")
+
+        print(json.loads(response.text))
+        return None
+
 
 def read_from_excel():
     baska_array = []
@@ -46,7 +62,7 @@ def find_and_match():
     for n in temp:
         temp_dict = {}
         temp_array = []
-        for key,value in (n.items()):
+        for key, value in (n.items()):
             # print(key, value)
             if key == '':
                 temp_dict['order_no'] = str(int(value) + 2)
@@ -56,19 +72,37 @@ def find_and_match():
             if unidecode(key.lower()) == "bitis tarihi":
                 temp_dict['endDate'] = value
             if unidecode(key.lower()) == "calisma sekli":
-                # mapping yapilmali
-                if value == "Tam Zamanli":
+                # temp_dict['employmentType'] = "fulltime"
+                # fulltime, casual, contracted, freelance, parttime, mobile, intern
+                if unidecode(value.lower()) == "tam zamanli":
                     temp_dict['employmentType'] = "fulltime"
-                # elif value == "":
-                #
+                elif unidecode(value.lower()) == "gecici":
+                    temp_dict['employmentType'] = "casual"
+                elif unidecode(value.lower()) == "kontratli":
+                    temp_dict['employmentType'] = "contracted"
+                elif unidecode(value.lower()) == "serbest calisan":
+                    temp_dict['employmentType'] = "freelance"
+                elif unidecode(value.lower()) == "yari zamanli":
+                    temp_dict['employmentType'] = "parttime"
+                elif unidecode(value.lower()) == "gezici" or unidecode(value.lower()) == "mobil":
+                    temp_dict['employmentType'] = "mobile"
+                elif unidecode(value.lower()) == "stajyer":
+                    temp_dict['employmentType'] = "intern"
             if unidecode(key.lower()) == "default":
-                temp_dict['default'] = (value)
+                if unidecode(value.lower()) == "false":
+                    temp_dict['default'] = (value)
+                elif unidecode(value.lower()) == "true":
+                    temp_dict['default'] = value
+                    #temp_dict['endDate'] == None
+                    del temp_dict['endDate']
+
             #     burasi bool olacak, varsayilan kariyer hatasi nedir ogrenilecek
+
+
             if unidecode(key.lower()) == "yonetici tckn":
                 temp_dict['managerId'] = get_ID({"page": 1, "status": 1, "q": value})
             if unidecode(key.lower()) == "tckn ":
                 temp_dict['personId'] = get_ID({"page": 1, "status": 1, "q": value})
-
 
             for t in listtemp:
                 if unidecode(t['name'].lower()) == unidecode(key.lower()):
@@ -78,14 +112,14 @@ def find_and_match():
                             # print(value,t['items'][y]['id'])
                             temp_dict["companyUnitItemId[" + t['id'] + "]"] = str(t['items'][y]['id'])
                             # print({"companyUnitItemId[" + t['id'] + "]": str(t['items'][y]['id'])})
-                            temp_array.append({"companyUnitItemId":str(t['items'][y]['id'])})
+                            temp_array.append({"companyUnitItemId": str(t['items'][y]['id'])})
                     temp_dict['items'] = temp_array
 
-        # print(temp_dict)
+        #print(temp_dict)
         general_array.append(temp_dict)
 
     # print(general_array)
-    return(general_array)
+    return (general_array)
 
 
 #   esitlik yoksa ne yapacagiz? hata verip, yapmayabiliriz, programi durdurabiliriz
@@ -116,7 +150,7 @@ def id_listing_for_career():
 def make_the_call(payload):
     # basarili ya da basarisizlarin printi
     for a in payload:
-        print(a)
+        #print(a)
         response = requests.request("POST", BASE_URL + "person-unit/save", headers={"Authorization":"Bearer " + API_TOKEN, "Content-Type":"application/json"}, data=json.dumps(a))
         if response.status_code == 200:
             print(a['order_no'] + " basarili")
@@ -124,11 +158,11 @@ def make_the_call(payload):
             # istek basarili oldugu icin herhangi bir aksiyon yapmamiza gerek yok
 
         else:
+            print(a['order_no'] + " NUMARALI SATIR YUKLENEMEDİ")
             print(response.text)
 
 if __name__ == "__main__":
-    # print(id_listing_for_career())
-    # print(read_from_excel())
+    #find_and_match()
     # temp = (read_from_excel())
     payload = find_and_match()
     make_the_call(payload)
@@ -138,4 +172,3 @@ if __name__ == "__main__":
     #     print(i['name'] + ":")
     #     for t in i['items']:
     #         print(i['items'][t]['name'])
-
