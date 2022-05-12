@@ -26,6 +26,7 @@ def get_ID(value):
         json_data = json.loads(response.text)
         for item in json_data['items']:
             return json_data['items'][item]['id']
+
     else:
         #for n in temp:
         #    if temp[n]['TCKN'] == value or temp[n]['Yonetici TCKN'] == value:
@@ -88,8 +89,15 @@ def find_and_match():
                 elif unidecode(value.lower()) == "stajyer":
                     temp_dict['employmentType'] = "intern"
             if unidecode(key.lower()) == "default":
-                temp_dict['default'] = (value)
+                if unidecode(value.lower()) == "false":
+                    temp_dict['default'] = (value)
+                elif unidecode(value.lower()) == "true":
+                    temp_dict['default'] = value
+                    #temp_dict['endDate'] == None
+                    del temp_dict['endDate']
+
             #     burasi bool olacak, varsayilan kariyer hatasi nedir ogrenilecek
+
 
             if unidecode(key.lower()) == "yonetici tckn":
                 temp_dict['managerId'] = get_ID({"page": 1, "status": 1, "q": value})
@@ -150,7 +158,7 @@ def make_the_call(payload):
             # istek basarili oldugu icin herhangi bir aksiyon yapmamiza gerek yok
 
         else:
-            print(a['order_no'] + " YUKLENEMEDİ")
+            print(a['order_no'] + " NUMARALI SATIR YUKLENEMEDİ")
             print(response.text)
 
 if __name__ == "__main__":
