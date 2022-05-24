@@ -27,6 +27,7 @@ def get_ID(value):
     response = requests.request("POST", SEARCH_METHOD, headers=HEADERS, data=(value))
     if response.status_code == 200:
         json_data = json.loads(response.text)
+        #print(json_data)
         for item in json_data['items']:
             return json_data['items'][item]['id']
     else:
@@ -35,7 +36,7 @@ def get_ID(value):
 
 def read_from_excel():
     baska_array = []
-    df = pd.read_excel('ege.xlsx')
+    df = pd.read_excel('deneme19.xlsx')
     df.to_csv('testing.csv',header=True)
     with open('testing.csv','r') as csv_file:
       csv_reader = csv.reader(csv_file)
@@ -47,15 +48,24 @@ def read_from_excel():
           baska_array.append(temp_dict)
     return baska_array
 
+
+
 def find_and_match():
     temp = read_from_excel()
     listtemp = id_listing_for_career()
     general_array = []
+
     for n in temp:
         temp_dict = {}
         temp_array = []
+        last_dict = {}
+        last_array = []
         for key, value in (n.items()):
             # print(key, value)
+            if unidecode(key.lower()) =="ad ":
+                last_dict['isim'] = value
+            if unidecode(key.lower()) =="soyad ":
+                last_dict['soyisim'] = value
             if key == '':
                 temp_dict['order_no'] = str(int(value) + 2)
             if unidecode(key.lower()) == "baslangic tarihi":
@@ -92,27 +102,39 @@ def find_and_match():
 
 
             if unidecode(key.lower()) == "yonetici tckn":
-                temp_dict['managerId'] = get_ID({"page": 1, "status": 1, "q": value})
+                if value != "":
+                    temp_dict['managerId'] = get_ID({"page": 1, "status": 1, "q": value})
             if unidecode(key.lower()) == "tckn ":
-                temp_dict['personId'] = get_ID({"page": 1, "status": 1, "q": value})
+                if value != "":
+                    temp_dict['personId'] = get_ID({"page": 1, "status": 1, "q": value})
+                else:
+                    temp_dict['personId'] = None
+
+
 
             for t in listtemp:
                 if unidecode(t['name'].lower()) == unidecode(key.lower()):
-                    # print(t['id'], key)
                     for y in t['items']:
                         if unidecode(value.lower()) == unidecode(t['items'][y]['name'].lower()):
-                            # print(value,t['items'][y]['id'])
+                            #print(temp_dict['order_no'] + " Numaralı Satır",key,value)
+                            #last_dict['order_no'] = temp_dict['order_no']
+
+                            #last_dict[key] = str(t['items'][y]['name'])
+
                             temp_dict["companyUnitItemId[" + t['id'] + "]"] = str(t['items'][y]['id'])
                             # print({"companyUnitItemId[" + t['id'] + "]": str(t['items'][y]['id'])})
                             temp_array.append({"companyUnitItemId": str(t['items'][y]['id'])})
+
                     temp_dict['items'] = temp_array
 
         #print(temp_dict)
         general_array.append(temp_dict)
+        #last_array.append(last_dict)
+        #csv_func(last_array)
+        #print(last_array)
 
-    # print(general_array)
+
     return (general_array)
-
 
 def id_listing_for_career():
     company_structure = []
@@ -128,24 +150,57 @@ def id_listing_for_career():
                 "status": json.loads(response.text)['data'][i]['status'],
             }
             company_structure.append(temp_object)
+            #print(temp_object)
     else:
         print("error")
     return company_structure
 
 def make_the_call(payload):
     # basarili ya da basarisizlarin printi
-    for a in payload:
-        #print(a)
-        response = requests.request("POST", BASE_URL + "person-unit/save", headers={"Authorization":"Bearer " + API_TOKEN, "Content-Type":"application/json"}, data=json.dumps(a))
-        if response.status_code == 200:
-            print(a['order_no'] + " basarili")
-            # istek basarili olduysa aksiyon ayarla
-            # istek basarili oldugu icin herhangi bir aksiyon yapmamiza gerek yok
 
-        else:
-            print(a['order_no'] + " NUMARALI SATIR YUKLENEMEDİ", json.loads(response.text)['message'])
+        for a in payload:
 
+            response = requests.request("POST", BASE_URL + "person-unit/save", headers={"Authorization":"Bearer " + API_TOKEN, "Content-Type":"application/json"}, data=json.dumps(a))
+
+            if response.status_code == 200:
+                print(a['order_no'] + " basarili")
+                working_type = json.loads(response.text)['data']['employmentType']
+                id = a['personId']
+                response = requests.request("GET", BASE_URL + "person-unit/list/"+id, headers=HEADERS)
+                write_csv(json.loads(response.text)['data']['units'],a['order_no'],working_type)
+                # istek basarili olduysa aksiyon ayarla
+                # istek basarili oldugu icin herhangi bir aksiyon yapmamiza gerek yok
+
+            else:
+                print(a['order_no'] + " NUMARALI SATIR YUKLENEMEDİ", json.loads(response.text)['message'])
+person_array=[]
+def write_csv(x,y,z):
+
+    for i in x:
+        person_obj={
+            "satir_numarasi" : y,
+            "calisma_turu":z,
+            "startDate" : i['startDate'],
+            "personId" : i['personId'],
+            "Sirket_adi" : i['unitItemsSummary']['1'],
+            "sube" : i['unitItemsSummary']['2'],
+            "lokasyon" : i['unitItemsSummary']['3'],
+            "departman" :i['unitItemsSummary']['4'],
+            "unvan" : i['unitItemsSummary']['5']
+        }
+
+        person_array.append(person_obj)
+    employee_info =['satir_numarasi','startDate','calisma_turu','personId','Sirket_adi','sube','lokasyon','departman','unvan']
+
+    with open('main_csv.csv', 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=employee_info)
+        writer.writeheader()
+        writer.writerows(person_array)
+
+
+        # print(temp_object)
 
 if __name__ == "__main__":
+
     payload = find_and_match()
     make_the_call(payload)
